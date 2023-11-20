@@ -14,11 +14,19 @@ Problems:
 
 1. health of the coral reef: bleaching, rugosity
 
-   tbl_benthic_cover: belaching, disease
+   datasets to use:
 
-   tbl_locations: the locations of the sampling units
+   > tbl_benthic_cover: belaching, disease
+   >
+   > tbl_locations: the locations of the sampling units
+   >
+   > tbl_rugosity: the rugosity of the reef
 
-   tbl_rugosity: the rugosity of the reef
+   tables to be generated
+
+   >time, location vs rugosity
+   >
+   >time, location vs bleaching
 
 2. biomass density of fish populations
 
