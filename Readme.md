@@ -10,6 +10,18 @@ Coral reefs are arguably the most fundamental building blocks for ocean environm
 
 Thus, we want to investigate how the coral reefs change over time to look at its overall health through a myriad of factors, i.e. biomass density of fish populations, rugosity, etc.
 
+Problems:
+
+1. health of the coral reef: bleaching, rugosity
+
+   tbl_benthic_cover: belaching, disease
+
+   tbl_locations: the locations of the sampling units
+
+   tbl_rugosity: the rugosity of the reef
+
+2. biomass density of fish populations
+
 ## Dataset: 
 
  Pacific Island Network Benthic Marine and Marine Fish Monitoring Dataset 2006 - 2022
@@ -22,22 +34,103 @@ Note that the files are too large for GitHub, you'd better to keep the datasets 
 
 ### Dataset contents
 Below is a list of the meanings of different dataset:
-* `tbl_Benthic_Cover.csv`: Information about the photo frames surveyed and if there was disease or bleaching detected.
+* `tbl_Benthic_Cover.csv`: Information about the photo frames surveyed and if there was disease or bleaching detected. This is mainly about bleaching
+
+  ```
+  "Benthic_ID","Event_ID","Frame","Analy_Date","FramdIder","TotalPoint","Disease_Bleaching","Severity","Benthic_Certified","Benthic_Certified_by","Benthic_Certified_Date"
+  ```
+
 * `tbl_Events/csv`: Sampling events data, including the date the survey was conducted, and rugosity.
+
+  ```
+  Event_ID,Location_ID,Protocol_Name,Start_Date,Notes,Rugosity,Entered_by,Entered_Date,Updated_Date,Fish_Certified,Fish_Certified_by,Fish_Certified_Date,QA_notes
+  ```
+
 * `tbl_Fish.csv`: Information about fish seen along transect. Species are recorded by number seen per size category.
+
+  ```
+  "Fish_ID","Event_ID","Taxon_ID","Number","Min","Max","AvgLgth","Area","Comments"
+  ```
+
 * `tbl_Juvenile_Colony.csv`: Contains data on genus identification per plate surface.
+
+  ```
+  "Juv_Colony_ID","Surface_ID","Taxon_ID","Genus_code","Ind_Count","Length_mm","Width_mm"
+  ```
+
 * `tbl_Locations.csv`: Sampling unit locations which are transects, both fixed and temporary.
+
+  ```
+  "Location_ID","Site_ID","Island","Subunit","Loc_Name","Loc_Type","Latitude","Latitude_Dir","Longitude","Longitude_Dir","GCS","Management","Habitat","Compass_bearing","Depth","Cut_Distance","Harbor_Distance","Loc_Notes","Loc_status","Loc_year_established","Loc_Created_Date","Loc_Updated_Date","Loc_Updated_by"
+  ```
+
 * `tbl_Points.csv`: Benthic data for each point that was identified within each frame in the software PhotoGrid.
+
+  ```
+  "Benthic_ID","Taxon_ID","Point","X","Y","Bleaching","Bleaching_Cat"
+  ```
+
 * `tbl_Proof.csv`: Contains information on which records have been proofed, corrected and certified.
+
+  ```
+  "Start_Date","Event_ID","Unit_Code","Data_Type","Location_ID","Loc_Name","Loc_Type","Proof_Count","Proofed","Corrected","Certified","Proof_Date","Proof_Reader","Comments"
+  ```
+
 * `tbl_Proof_Tracking.csv`: Contains data on benthic records that were proofed for certification, including the percent error.
+
+  ```
+  "Event_ID","Location_ID","Points_Reviewed","Points_Corrected","Percent_Error","Proof_Date","Proof_Reader"
+  ```
+
 * `tbl_Revision_Log.csv`: Database revision history data.
+
+  ```
+  Revision_ID,Revision_Date,Revision_Description,Revision_Comments,Revision_By,Ceritified_Data_Update
+  ```
+
 * `tbl_Rugosity.csv`: Stores rugosity measurement.
+
+  ```
+  "Event_ID","Chain_length","Tape_length"
+  ```
+
 * `tbl_Settlement.csv`: Contains data about coral recruitment- mainly on plate and posts being retrieved and deployed.
+
+  ```
+  "Settlement_ID","Event_ID","CRA","Plate_number","Retrieved_Plate_Pair","Duration","Sett_Certified","Sett_Certified_by","Sett_Certified_date"
+  ```
+
 * `tbl_Sites`: Location aggregations, park units in this case. 
+
+  ```
+  "Site_ID","Unit_Code","Site_Name","Site_Area"
+  ```
+
 * `tbl_Surfaces.csv`: Stores which surfaces were being analyzed per plate pair.
+
+  ```
+  "Surface_ID","Settlement_ID","Surface","Orientation"
+  ```
+
 * `tlu_Contacts.csv`: Contact data for project-related personnel
+
+  ```
+  "Contact_ID","Last_Name","First_Name","Middle_Init","Obsr_Code","Organization","Position_Title","Address_Type","Address","Address2","City","State_Code","Zip_Code","Country","Email","Work_Phone","Work_Extension","Contact_Notes","Active"
+  ```
+
 * `tlu_Taxon.csv`: Contains information for all taxon that may be detected during monitoring.
+
+  ```
+  Taxon_ID,AphiaID,Status,Type,Settlement,Kingdom,Phylum,Class,Order,Family,Genus,Species,Taxon_Name,Synonym,Species_Code,Authority,Reference,Target_Species,Hawaiian_Name,Common_Name,Trophic,Consumer,Endemic,Mobility,a_Variable,b_Variable,Reference_ab_Variable,Congener,TL_TO_SL_FL,Reference_TL_TO_SL_FL,ESA_Status,Comments,Update_Date,Update_By
+  ```
+
 * `xref_Event_Contacts.csv`: Cross-reference table between events and contacts.
+
+  ```
+  Event_ID,Contact_ID,Contact_Role
+  ```
+
+  
 
 
 ## Solution: 
