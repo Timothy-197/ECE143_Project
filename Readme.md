@@ -30,6 +30,22 @@ Problems:
 
 2. biomass density of fish populations
 
+    Datasets to use:
+    > *tbl_Fish*: Fish density (fish count and area) found at every event.
+    >
+    > *tbl_Juvenile_Colony*: Juvenile colony density (juvenile individual count and size) found at every event.
+    >
+    > *tbl_Surface*: Surfaces discovered at every event. Used for linking juvenile colony and surface.  
+    >
+    > *tbl_Settlement*: Settlements discovered at every event. Used for linking surface and settlement.
+    >
+    > *tbl_Event*: Discovery events through time. Used for linking settlement and event (hence linking juvenile colony and event), and linking fish and event.
+
+    Tables to generate:
+    > time vs fish density (average of all fish_id's densities for a given time)
+    >
+    > time vs juvenile colony density (average of all juvenile colonies's densities for a given time)
+
 ## Dataset: 
 
  Pacific Island Network Benthic Marine and Marine Fish Monitoring Dataset 2006 - 2022
