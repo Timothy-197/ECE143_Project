@@ -4,6 +4,9 @@ class Data_loader:
     import pandas as pd
     def __init__(self, data_dir = './records-2300415/'):
         self._data_dir = data_dir
+        self._location_columns = ["Location_ID","Site_ID","Island","Subunit","Loc_Name","Loc_Type","GCS","Management","Depth","Loc_status"]
+        self._df_Locations = self._df_preprocess(pd.read_csv("{}tbl_Locations.csv".format(data_dir)))[self._location_columns]
+        self._df_Events = self._df_preprocess(pd.read_csv("{}tbl_Events.csv".format(data_dir)))
 
     def _df_ID_formatting(self, df:pd.DataFrame):
         """
@@ -55,16 +58,16 @@ class Data_loader_coral_reef_health(Data_loader):
     def __init__(self, data_dir='./records-2300415/'):
         self._df_benthic_cover = super()._df_preprocess(pd.read_csv("{}tbl_Benthic_Cover.csv".format(data_dir)))
         self._df_Rugosity = super()._df_preprocess(pd.read_csv("{}tbl_Rugosity.csv".format(data_dir)))
-        self._df_Locations = super()._df_preprocess(pd.read_csv("{}tbl_Locations.csv".format(data_dir)))
-        self._df_Events = super()._df_preprocess(pd.read_csv("{}tbl_Events.csv".format(data_dir)))
         self._bleaching_columns = ['Event_ID', 'Location_ID', 'Start_Date', 'Rugosity', 'Entered_Date', 'Benthic_ID', 'Frame', 'Disease_Bleaching', 'Severity']
         self._rugosity_columns = ['Event_ID', 'Location_ID', 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length"]
+        self._location_columns = []
         # rugosity here refers to wehter the df contain such column, disease bleaching is yes or no
         super().__init__(data_dir)
     
     def get_df_time_location_bleaching(self):
         # get time & location vs bleaching
         df_time_loc_bleaching = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")[self._bleaching_columns]
+        df_time_loc_bleaching = df_time_loc_bleaching.merge(self._df_Locations, on='Location_ID', how='inner')
         return df_time_loc_bleaching
     
     def get_df_time_location_bleaching_severity(self):
@@ -76,33 +79,11 @@ class Data_loader_coral_reef_health(Data_loader):
     def get_df_time_loc_rugosity(self):
         df_time_loc_rugosity = self._df_Events.merge(self._df_Rugosity, on='Event_ID', how="inner")[self._rugosity_columns]
         df_time_loc_rugosity["Heterogeneity"] = df_time_loc_rugosity["Chain_length"] / df_time_loc_rugosity["Tape_length"]
-        print(df_time_loc_rugosity)
-        print(df_time_loc_rugosity.groupby(df_time_loc_rugosity['Location_ID']).groups)
+        df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='inner')
         return df_time_loc_rugosity
 
     def get_dir(self):
         print(self._df_benthic_cover)
 
 data_loader = Data_loader_coral_reef_health()
-data_loader.get_df_time_loc_rugosity()
-
-# data_dir = "./records-2300415/"
-# # get data for the problem is coral reef health
-# df_benthic_cover = df_preprocess(pd.read_csv("{}tbl_Benthic_Cover.csv".format(data_dir)))
-
-# df_Rugosity = df_preprocess(pd.read_csv("{}tbl_Rugosity.csv".format(data_dir)))
-
-# df_Locations = df_preprocess(pd.read_csv("{}tbl_Locations.csv".format(data_dir)))
-
-# df_Events = df_preprocess(pd.read_csv("{}tbl_Events.csv".format(data_dir)))
-
-
-    
-# # join event & rugosity to get the rugosity vs time & location
-# df_time_loc_rugosity = df_Events.merge(df_Rugosity, on='Event_ID', how="inner")
-# print(df_time_loc_rugosity.Start_Date[0])
-# print(df_time_loc_rugosity.columns.values)
-    
-# join event & benthic cover to get the bleaching vs time & location
-# df_time_loc_bleaching = df_Events.merge(df_benthic_cover, on='Event_ID', how="inner")
-# print(df_time_loc_bleaching.columns.values)
+print(data_loader.get_df_time_loc_rugosity())
