@@ -165,6 +165,10 @@ Specifically, we want to look at the changes in composition in the coral reef be
 
   Using this data, we can evaluate the overall health in the coral reef benthos. To do this, we will measure the aforementioned relative biomass/density/species shift of all fish in the environment, and the rugosity (coral reef structure). We will combine them with methods including but not limited to weighted sum or exponential weighted average to draw conclusions. 
 
+### Step 0: Download dataset
+
+You need to first download the dataset to get everything work. Since the dataset is too large for a github repository, you should download it yourself and put the file in the root directory.
+
 ### Step 1: Data Cleaning
 
 In this step, we organize the data into several pandas dataframes. Each set of dataframes corresponds to a QUESTION we are study.
