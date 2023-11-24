@@ -1,7 +1,6 @@
 import pandas as pd
 
 class Data_loader:
-    import pandas as pd
     def __init__(self, data_dir = './records-2300415/'):
         self._data_dir = data_dir
         self._location_columns = ["Location_ID","Site_ID","Island","Subunit","Loc_Name","Loc_Type","GCS","Management","Depth","Loc_status"]
@@ -53,7 +52,7 @@ class Data_loader_coral_reef_health(Data_loader):
     This class is dataloader to investigate the coral reef health
     It focus on two things:
     1. time location vs bleaching
-    2. time location vs rugosity
+    2. time location vs rugosity (heterogeneity)
     """
     def __init__(self, data_dir='./records-2300415/'):
         self._df_benthic_cover = super()._df_preprocess(pd.read_csv("{}tbl_Benthic_Cover.csv".format(data_dir)))
@@ -82,8 +81,6 @@ class Data_loader_coral_reef_health(Data_loader):
         df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='inner')
         return df_time_loc_rugosity
 
-    def get_dir(self):
-        print(self._df_benthic_cover)
-
-data_loader = Data_loader_coral_reef_health()
-print(data_loader.get_df_time_loc_rugosity())
+if __name__ == "__main__":
+    data_loader = Data_loader_coral_reef_health()
+    print(data_loader.get_df_time_loc_rugosity())

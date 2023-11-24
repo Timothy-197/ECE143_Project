@@ -14,6 +14,8 @@ Problems:
 
 1. health of the coral reef: bleaching, rugosity
 
+   rugosity: https://www.researchgate.net/figure/The-tape-chain-rugosity-measurement-is-an-in-situ-method-of-evaluating-terrain_fig4_323932975
+
    datasets to use:
 
    > tbl_benthic_cover: belaching, disease
@@ -162,3 +164,31 @@ Below is a list of the meanings of different dataset:
 Specifically, we want to look at the changes in composition in the coral reef benthos. This involves data visualization of rugosity( coral reef structures) throughout the time that this data has been recorded. We also want to observe the change in size for fish species across time, as well as the introduction/removal of fish species in the area to find indications of possible disruptive events in the ecosystem, since the data on fish can be a reflection on the health of the coral reef itself. We can apply statistical methods including but not limited to line charts and histograms to do this.
 
   Using this data, we can evaluate the overall health in the coral reef benthos. To do this, we will measure the aforementioned relative biomass/density/species shift of all fish in the environment, and the rugosity (coral reef structure). We will combine them with methods including but not limited to weighted sum or exponential weighted average to draw conclusions. 
+
+### Step 1: Data Cleaning
+
+In this step, we organize the data into several pandas dataframes. Each set of dataframes corresponds to a QUESTION we are study.
+
+#### Question 1: Change over the coral reef health
+
+You need dataframes containing the following information:
+
+1. time & location vs coral reef rugosity (heterogeneity)
+2. time & location vs coral reef bleaching 
+
+To use the dataframes, you need to use the class `Data_loader_coral_reef_health`
+
+```python
+# get dataframe of time & location vs coral reef rugosity (heterogeneity):
+data_loader = Data_loader_coral_reef_health()
+df_heterogeneity = data_loader.get_df_time_loc_rugosity()
+```
+
+```python
+# get dataframe of 1. time & location vs coral reef bleaching 
+data_loader = Data_loader_coral_reef_health()
+df_bleaching = data_loader.get_df_time_location_bleaching()
+# if you want to investigate the bleaching with severity, you can:
+df_bleaching_severity = data_loader.get_df_time_location_bleaching_severity()
+```
+
