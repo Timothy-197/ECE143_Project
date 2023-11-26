@@ -30,7 +30,7 @@ Problems:
    >
    >time, location vs bleaching
 
-2. biomass density of fish populations
+2. Coral reef health conditions: Biomass density of fish, and juvenile colony size variations
 
     Datasets to use:
     > *tbl_Fish*: Fish density (fish count and area) found at every event.
@@ -44,9 +44,9 @@ Problems:
     > *tbl_Event*: Discovery events through time. Used for linking settlement and event (hence linking juvenile colony and event), and linking fish and event.
 
     Tables to generate:
-    > time vs fish density (average of all fish_id's densities for a given time)
+    > time vs fish density 
     >
-    > time vs juvenile colony density (average of all juvenile colonies's densities for a given time)
+    > time vs juvenile colony size
 
 ## Dataset: 
 
@@ -196,3 +196,26 @@ df_bleaching = data_loader.get_df_time_location_bleaching()
 df_bleaching_severity = data_loader.get_df_time_location_bleaching_severity()
 ```
 
+#### Question 2: Change of the coral reef biological conditions 
+
+Dataframes necessary for analysis include the following information:
+
+1. time vs fish density
+2. time vs juvenile colony size
+
+You can use `Data_Loader_biomass_density_change` for loading the cleaned and merged biomass density and juvenile colony size datasets.
+
+
+```python
+# get general density/size data loader
+data_loader_biomass = Data_Loader_biomass_density_change()
+# get time vs fish density data
+data_fish_density = data_loader_biomass.get_df_time_fish_density()
+```
+
+```python
+# get general density/size data loader
+data_loader_biomass = Data_Loader_biomass_density_change()
+# get time vs juvenile size data
+data_juvenile_size = data_loader_biomass.get_df_time_juvenile_size()
+```

@@ -81,6 +81,70 @@ class Data_loader_coral_reef_health(Data_loader):
         df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='inner')
         return df_time_loc_rugosity
 
+class Data_Loader_biomass_density_change(Data_loader):
+    """
+    This class is dataloader to measure biomass density change and species size change at the coral reef over time
+    It focus on two things:
+    1. time vs fish density
+    2. time vs juvenile colony size
+    """
+    def __init__(self, data_dir='./records-biomass/'):
+        self._df_Fish = super()._df_preprocess(pd.read_csv("{}tbl_Fish.csv".format(data_dir)))
+        self._df_Juvenile_Colony = self._df_preprocess_juvenile_colony(pd.read_csv("{}tbl_Juvenile_Colony.csv".format(data_dir)))
+        self._df_Settlement = super()._df_preprocess(pd.read_csv("{}tbl_Settlement.csv".format(data_dir)))
+        self._df_Surfaces = super()._df_preprocess(pd.read_csv("{}tbl_Surfaces.csv".format(data_dir)))
+        self._df_Taxons = super()._df_preprocess(pd.read_csv("{}tlu_Taxon.csv".format(data_dir)))
+        self._fish_density_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', 'Location_ID', 'Start_Date', 'Entered_Date', 'Number', 'Area']
+        self._juvenile_surface_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Taxon_ID", "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
+        self._juvenile_settlement_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
+        self._time_juvenile_size_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
+        self._time_juvenile_size_taxon_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
+        # self._time_juvenile_size_loc_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", "Loc_Name", "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
+        # self._juvenile_density_columns = ['Event_ID', 'Location_ID', 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length"]
+        
+        super().__init__(data_dir)
+
+    def _df_preprocess_juvenile_colony(self, df_juvenile_colony: pd.DataFrame):
+        """
+        Pre-process juvenile colony table by elimicating rows with incomplete information
+        """
+        df_juvenile_colony = super()._df_preprocess(df_juvenile_colony)
+        df_juvenile_colony = df_juvenile_colony[df_juvenile_colony["Ind_Count"].notna()]
+        return df_juvenile_colony
+
+    def get_df_time_fish_density(self):
+        """
+        Get dataframe containing event time (in month) and fish groups' density
+        """
+        # get fish density variations over time
+        df_time_fish_density = self._df_Fish.merge(self._df_Events, on='Event_ID', how="inner")[self._fish_density_columns]
+        # Compute fish density per group of fish (number per unit area)
+        df_time_fish_density["Density"] = df_time_fish_density["Number"] / df_time_fish_density["Area"]
+        # Possible analysis TODO: Group density by months (either given Taxons or not) or 
+        #                         Taxons (given months) using average, and plot the density change 
+        #                         trend w.r.t. time/Taxon.
+        return df_time_fish_density
+    
+    def get_df_time_juvenile_size(self):
+        """
+        Get dataframe containing event time (in month) and the sizes of the juvenile colonies discovered
+        """
+        # get juvenile species size variations over time
+        df_juvenile_surface = self._df_Juvenile_Colony.merge(self._df_Surfaces, on='Surface_ID', how="inner")[self._juvenile_surface_columns]
+        df_juvenile_settlement = df_juvenile_surface.merge(self._df_Settlement, on='Settlement_ID', how="inner")[self._juvenile_settlement_columns]
+        df_time_juvenile_size = df_juvenile_settlement.merge(self._df_Events, on='Event_ID', how="inner")[self._time_juvenile_size_columns]
+        df_time_juvenile_size_taxon  = df_time_juvenile_size.merge(self._df_Taxons, on='Taxon_ID', how="inner")[self._time_juvenile_size_taxon_columns]
+        df_time_juvenile_size_taxon = df_time_juvenile_size_taxon[df_time_juvenile_size_taxon["Taxon_Name"].notna()]
+        df_time_juvenile_size_taxon["Size_mm"] = df_time_juvenile_size_taxon["Length_mm"]*df_time_juvenile_size_taxon["Width_mm"]
+        # Possible analysis TODO: Group Size by Taxon using average, and measure the species size change 
+        #                         across time given a Taxon.
+        return df_time_juvenile_size_taxon
+
+
+
 if __name__ == "__main__":
     data_loader = Data_loader_coral_reef_health()
+    data_loader_biomass = Data_Loader_biomass_density_change()
     print(data_loader.get_df_time_loc_rugosity())
+    print(data_loader_biomass.get_df_time_fish_density())
+    print(data_loader_biomass.get_df_time_juvenile_size())
