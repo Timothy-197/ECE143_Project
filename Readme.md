@@ -10,7 +10,7 @@ Coral reefs are arguably the most fundamental building blocks for ocean environm
 
 Thus, we want to investigate how the coral reefs change over time to look at its overall health through a myriad of factors, i.e. biomass density of fish populations, rugosity, etc.
 
-Problems:
+## Questions:
 
 1. health of the coral reef: bleaching, rugosity
 
@@ -18,11 +18,11 @@ Problems:
 
    datasets to use:
 
-   > tbl_benthic_cover: belaching, disease
+   > *tbl_benthic_cover*: belaching, disease
    >
-   > tbl_locations: the locations of the sampling units
+   > *tbl_locations*: the locations of the sampling units
    >
-   > tbl_rugosity: the rugosity of the reef
+   > *tbl_rugosity*: the rugosity of the reef
 
    tables to be generated
 
@@ -66,7 +66,7 @@ Below is a list of the meanings of different dataset:
   "Benthic_ID","Event_ID","Frame","Analy_Date","FramdIder","TotalPoint","Disease_Bleaching","Severity","Benthic_Certified","Benthic_Certified_by","Benthic_Certified_Date"
   ```
 
-* `tbl_Events/csv`: Sampling events data, including the date the survey was conducted, and rugosity.
+* `tbl_Events.csv`: Sampling events data, including the date the survey was conducted, and rugosity.
 
   ```
   Event_ID,Location_ID,Protocol_Name,Start_Date,Notes,Rugosity,Entered_by,Entered_Date,Updated_Date,Fish_Certified,Fish_Certified_by,Fish_Certified_Date,QA_notes
@@ -219,3 +219,13 @@ data_loader_biomass = Data_Loader_biomass_density_change()
 # get time vs juvenile size data
 data_juvenile_size = data_loader_biomass.get_df_time_juvenile_size()
 ```
+
+## Running: 
+
+Run using the following command to view the cleaned data:
+
+```python
+python data_process.py
+```
+
+Place the required .csv files (indicated in the **Questions** section) under the *records-2300415* directory. Then you can run successfully.

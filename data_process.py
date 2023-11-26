@@ -88,7 +88,7 @@ class Data_Loader_biomass_density_change(Data_loader):
     1. time vs fish density
     2. time vs juvenile colony size
     """
-    def __init__(self, data_dir='./records-biomass/'):
+    def __init__(self, data_dir='./records-2300415/'):
         self._df_Fish = super()._df_preprocess(pd.read_csv("{}tbl_Fish.csv".format(data_dir)))
         self._df_Juvenile_Colony = self._df_preprocess_juvenile_colony(pd.read_csv("{}tbl_Juvenile_Colony.csv".format(data_dir)))
         self._df_Settlement = super()._df_preprocess(pd.read_csv("{}tbl_Settlement.csv".format(data_dir)))
