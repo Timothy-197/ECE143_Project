@@ -30,12 +30,12 @@ Thus, we want to investigate how the coral reefs change over time to look at its
    >
    >time, location vs bleaching
 
-2. Coral reef health conditions: Biomass density of fish, and juvenile colony size variations
+2. Coral reef biological conditions: Biomass density of fish, and juvenile colony size variations
 
     Datasets to use:
     > *tbl_Fish*: Fish density (fish count and area) found at every event.
     >
-    > *tbl_Juvenile_Colony*: Juvenile colony density (juvenile individual count and size) found at every event.
+    > *tbl_Juvenile_Colony*: Juvenile colony size found at every event.
     >
     > *tbl_Surface*: Surfaces discovered at every event. Used for linking juvenile colony and surface.  
     >
@@ -182,10 +182,17 @@ You need dataframes containing the following information:
 
 To use the dataframes, you need to use the class `Data_loader_coral_reef_health`
 
+Note: reference of measurement of rugosity: https://www.researchgate.net/figure/The-tape-chain-rugosity-measurement-is-an-in-situ-method-of-evaluating-terrain_fig4_323932975
+
 ```python
 # get dataframe of time & location vs coral reef rugosity (heterogeneity):
 data_loader = Data_loader_coral_reef_health()
 df_heterogeneity = data_loader.get_df_time_loc_rugosity()
+
+# in this question, you just need to focus on the following columns:
+# -- time: ['Start_Date']
+# -- location: ['Island', 'Subunit', 'Loc_Name'] ('Island' is the most important one)
+# -- rugosity (heterogeneity): ['Heterogeneity']
 ```
 
 ```python
@@ -194,6 +201,11 @@ data_loader = Data_loader_coral_reef_health()
 df_bleaching = data_loader.get_df_time_location_bleaching()
 # if you want to investigate the bleaching with severity, you can:
 df_bleaching_severity = data_loader.get_df_time_location_bleaching_severity()
+
+# in this question, you just need to focus on the following columns:
+# -- time: ['Start_Date']
+# -- location: ['Island', 'Subunit', 'Loc_Name'] ('Island' is the most important one)
+# -- bleaching: ['Disease_Bleaching', 'Severity']
 ```
 
 #### Question 2: Change of the coral reef biological conditions 
@@ -211,6 +223,12 @@ You can use `Data_Loader_biomass_density_change` for loading the cleaned and mer
 data_loader_biomass = Data_Loader_biomass_density_change()
 # get time vs fish density data
 data_fish_density = data_loader_biomass.get_df_time_fish_density()
+
+# The following columns would be helpful in this question:
+# -- time: ['Start_Date'] (In months)
+# -- fish density: ['Density'] (Indicating density per group of fish. You may average across time to get its temporal trend)
+# -- taxon: ['Taxon_ID', 'Taxon_Name', "Type"]
+# -- location: ['Location_ID', 'Island', 'Subunit', 'Loc_Name']
 ```
 
 ```python
@@ -218,6 +236,12 @@ data_fish_density = data_loader_biomass.get_df_time_fish_density()
 data_loader_biomass = Data_Loader_biomass_density_change()
 # get time vs juvenile size data
 data_juvenile_size = data_loader_biomass.get_df_time_juvenile_size()
+
+# The following columns would be helpful in this question:
+# -- time: ['Start_Date'] (In months)
+# -- juvenile colony size: ['Size_mm'] (Size per juvenile colony in mm. You may measure the size change over time given a taxon, by grouping the size using Taxon_ID and visualizing across time)
+# -- taxon: ['Taxon_ID', 'Taxon_Name', "Type"]
+# -- location: ['Location_ID', 'Island', 'Subunit', 'Loc_Name']
 ```
 
 ## Running: 

@@ -95,11 +95,13 @@ class Data_Loader_biomass_density_change(Data_loader):
         self._df_Surfaces = super()._df_preprocess(pd.read_csv("{}tbl_Surfaces.csv".format(data_dir)))
         self._df_Taxons = super()._df_preprocess(pd.read_csv("{}tlu_Taxon.csv".format(data_dir)))
         self._fish_density_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', 'Location_ID', 'Start_Date', 'Entered_Date', 'Number', 'Area']
+        self._fish_density_taxon_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', "Taxon_Name", "Type", 'Location_ID', 'Start_Date', 'Entered_Date', 'Number', 'Area']
+        self._fish_density_taxon_loc_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', "Taxon_Name", "Type", 'Location_ID', 'Island', 'Subunit', 'Loc_Name', 'Start_Date', 'Entered_Date', 'Number', 'Area', 'Density']
         self._juvenile_surface_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Taxon_ID", "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         self._juvenile_settlement_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         self._time_juvenile_size_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         self._time_juvenile_size_taxon_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
-        # self._time_juvenile_size_loc_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", "Loc_Name", "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
+        self._time_juvenile_size_taxon_loc_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", 'Island', 'Subunit', 'Loc_Name', "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         # self._juvenile_density_columns = ['Event_ID', 'Location_ID', 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length"]
         
         super().__init__(data_dir)
@@ -118,12 +120,17 @@ class Data_Loader_biomass_density_change(Data_loader):
         """
         # get fish density variations over time
         df_time_fish_density = self._df_Fish.merge(self._df_Events, on='Event_ID', how="inner")[self._fish_density_columns]
-        # Compute fish density per group of fish (number per unit area)
-        df_time_fish_density["Density"] = df_time_fish_density["Number"] / df_time_fish_density["Area"]
+        df_time_fish_density_taxon = df_time_fish_density.merge(self._df_Taxons, on='Taxon_ID', how="inner")[self._fish_density_taxon_columns]
+        # clean out fish groups with unknown taxon name
+        df_time_fish_density_taxon = df_time_fish_density_taxon[df_time_fish_density_taxon["Taxon_Name"].notna()]
+        # compute fish density given per group of fish (number per unit area)
+        df_time_fish_density_taxon["Density"] = df_time_fish_density_taxon["Number"] / df_time_fish_density_taxon["Area"]
+        df_time_fish_density_taxon_loc = df_time_fish_density_taxon.merge(self._df_Locations, on='Location_ID', how="inner")[self._fish_density_taxon_loc_columns]
+        df_time_fish_density_taxon_loc = df_time_fish_density_taxon_loc[df_time_fish_density_taxon_loc["Island"].notna()]
         # Possible analysis TODO: Group density by months (either given Taxons or not) or 
         #                         Taxons (given months) using average, and plot the density change 
         #                         trend w.r.t. time/Taxon.
-        return df_time_fish_density
+        return df_time_fish_density_taxon_loc
     
     def get_df_time_juvenile_size(self):
         """
@@ -134,18 +141,23 @@ class Data_Loader_biomass_density_change(Data_loader):
         df_juvenile_settlement = df_juvenile_surface.merge(self._df_Settlement, on='Settlement_ID', how="inner")[self._juvenile_settlement_columns]
         df_time_juvenile_size = df_juvenile_settlement.merge(self._df_Events, on='Event_ID', how="inner")[self._time_juvenile_size_columns]
         df_time_juvenile_size_taxon  = df_time_juvenile_size.merge(self._df_Taxons, on='Taxon_ID', how="inner")[self._time_juvenile_size_taxon_columns]
-        df_time_juvenile_size_taxon = df_time_juvenile_size_taxon[df_time_juvenile_size_taxon["Taxon_Name"].notna()]
-        df_time_juvenile_size_taxon["Size_mm"] = df_time_juvenile_size_taxon["Length_mm"]*df_time_juvenile_size_taxon["Width_mm"]
+        df_time_juvenile_size_taxon_loc = df_time_juvenile_size_taxon.merge(self._df_Locations, on='Location_ID', how="inner")[self._time_juvenile_size_taxon_loc_columns]
+        # clean out juveniles with unknown location information
+        df_time_juvenile_size_taxon_loc = df_time_juvenile_size_taxon_loc[df_time_juvenile_size_taxon_loc["Island"].notna()]
+        # clean out juveniles with unknown taxon name
+        df_time_juvenile_size_taxon_loc = df_time_juvenile_size_taxon_loc[df_time_juvenile_size_taxon_loc["Taxon_Name"].notna()]
+        # compute sizes of juvenile individuals
+        df_time_juvenile_size_taxon_loc["Size_mm"] = df_time_juvenile_size_taxon_loc["Length_mm"]*df_time_juvenile_size_taxon_loc["Width_mm"]
         # Possible analysis TODO: Group Size by Taxon using average, and measure the species size change 
         #                         across time given a Taxon.
-        return df_time_juvenile_size_taxon
+        return df_time_juvenile_size_taxon_loc
 
 
 
 if __name__ == "__main__":
     data_loader = Data_loader_coral_reef_health()
     data_loader_biomass = Data_Loader_biomass_density_change()
-    print(data_loader.get_df_time_loc_rugosity())
-    print(data_loader_biomass.get_df_time_fish_density())
-    print(data_loader_biomass.get_df_time_fish_density().columns.values)
-    print(data_loader_biomass.get_df_time_juvenile_size().columns.values)
+    print(data_loader.get_df_time_loc_rugosity().columns.values, len(data_loader.get_df_time_loc_rugosity().columns.values))
+    print(data_loader.get_df_time_location_bleaching().columns.values, len(data_loader.get_df_time_location_bleaching().columns.values))
+    print(data_loader_biomass.get_df_time_fish_density().columns.values, len(data_loader_biomass.get_df_time_fish_density()))
+    print(data_loader_biomass.get_df_time_juvenile_size().columns.values, len(data_loader_biomass.get_df_time_juvenile_size()))
