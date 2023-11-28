@@ -161,3 +161,5 @@ if __name__ == "__main__":
     print(data_loader.get_df_time_location_bleaching().columns.values, len(data_loader.get_df_time_location_bleaching().columns.values))
     print(data_loader_biomass.get_df_time_fish_density().columns.values, len(data_loader_biomass.get_df_time_fish_density()))
     print(data_loader_biomass.get_df_time_juvenile_size().columns.values, len(data_loader_biomass.get_df_time_juvenile_size()))
+    data_loader_biomass.get_df_time_fish_density().to_csv("time_fish_density.csv")
+    data_loader_biomass.get_df_time_juvenile_size().to_csv("time_juvenile_size.csv")
