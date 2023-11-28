@@ -182,10 +182,17 @@ You need dataframes containing the following information:
 
 To use the dataframes, you need to use the class `Data_loader_coral_reef_health`
 
+Note: reference of measurement of rugosity: https://www.researchgate.net/figure/The-tape-chain-rugosity-measurement-is-an-in-situ-method-of-evaluating-terrain_fig4_323932975
+
 ```python
 # get dataframe of time & location vs coral reef rugosity (heterogeneity):
 data_loader = Data_loader_coral_reef_health()
 df_heterogeneity = data_loader.get_df_time_loc_rugosity()
+
+# in this question, you just need to focus on the following columns:
+# -- time: ['Start_Date']
+# -- location: ['Island', 'Subunit', 'Loc_Name'] ('Island' is the most important one)
+# -- rugosity (heterogeneity): ['Heterogeneity']
 ```
 
 ```python
@@ -194,6 +201,11 @@ data_loader = Data_loader_coral_reef_health()
 df_bleaching = data_loader.get_df_time_location_bleaching()
 # if you want to investigate the bleaching with severity, you can:
 df_bleaching_severity = data_loader.get_df_time_location_bleaching_severity()
+
+# in this question, you just need to focus on the following columns:
+# -- time: ['Start_Date']
+# -- location: ['Island', 'Subunit', 'Loc_Name'] ('Island' is the most important one)
+# -- bleaching: ['Disease_Bleaching', 'Severity']
 ```
 
 #### Question 2: Change of the coral reef biological conditions 

@@ -145,6 +145,5 @@ class Data_Loader_biomass_density_change(Data_loader):
 if __name__ == "__main__":
     data_loader = Data_loader_coral_reef_health()
     data_loader_biomass = Data_Loader_biomass_density_change()
-    print(data_loader.get_df_time_loc_rugosity())
-    print(data_loader_biomass.get_df_time_fish_density())
-    print(data_loader_biomass.get_df_time_juvenile_size())
+    print(data_loader.get_df_time_loc_rugosity().columns.values)
+    print(data_loader.get_df_time_location_bleaching().columns.values)
