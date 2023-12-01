@@ -65,20 +65,21 @@ class Data_loader_coral_reef_health(Data_loader):
     
     def get_df_time_location_bleaching(self):
         # get time & location vs bleaching
-        df_time_loc_bleaching = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")[self._bleaching_columns]
-        df_time_loc_bleaching = df_time_loc_bleaching.merge(self._df_Locations, on='Location_ID', how='inner')
+        df_time_loc_bleaching = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")
+        df_time_loc_bleaching = df_time_loc_bleaching.merge(self._df_Locations, on='Location_ID', how='inner')[self._bleaching_columns]
         return df_time_loc_bleaching
     
     def get_df_time_location_bleaching_severity(self):
         # get time & location vs bleaching with severity
-        df = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")[self._bleaching_columns]
+        df = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")
+        df = df.merge(self._df_Locations, on='Location_ID', how='inner')[self._bleaching_columns]
         df = df[df["Severity"].notna()]
         return df
     
     def get_df_time_loc_rugosity(self):
-        df_time_loc_rugosity = self._df_Events.merge(self._df_Rugosity, on='Event_ID', how="inner")[self._rugosity_columns]
+        df_time_loc_rugosity = self._df_Events.merge(self._df_Rugosity, on='Event_ID', how="inner")
         df_time_loc_rugosity["Heterogeneity"] = df_time_loc_rugosity["Chain_length"] / df_time_loc_rugosity["Tape_length"]
-        df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='inner')
+        df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='inner')[self._rugosity_columns]
         return df_time_loc_rugosity
 
 class Data_Loader_biomass_density_change(Data_loader):
@@ -163,3 +164,4 @@ if __name__ == "__main__":
     print(data_loader_biomass.get_df_time_juvenile_size().columns.values, len(data_loader_biomass.get_df_time_juvenile_size()))
     data_loader_biomass.get_df_time_fish_density().to_csv("time_fish_density.csv")
     data_loader_biomass.get_df_time_juvenile_size().to_csv("time_juvenile_size.csv")
+    df_ju = data_loader_biomass.get_df_time_juvenile_size().groupby(["Island"])
