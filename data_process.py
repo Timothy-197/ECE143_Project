@@ -3,7 +3,7 @@ import pandas as pd
 class Data_loader:
     def __init__(self, data_dir = './records-2300415/'):
         self._data_dir = data_dir
-        self._location_columns = ["Location_ID","Site_ID","Island","Subunit","Loc_Name","Loc_Type","GCS","Management","Depth","Loc_status"]
+        self._location_columns = ["Location_ID","Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", "Site_ID","Island","Subunit","Loc_Name","Loc_Type","GCS","Management","Depth","Loc_status"]
         self._df_Locations = self._df_preprocess(pd.read_csv("{}tbl_Locations.csv".format(data_dir)))[self._location_columns]
         self._df_Events = self._df_preprocess(pd.read_csv("{}tbl_Events.csv".format(data_dir)))
 
@@ -57,8 +57,8 @@ class Data_loader_coral_reef_health(Data_loader):
     def __init__(self, data_dir='./records-2300415/'):
         self._df_benthic_cover = super()._df_preprocess(pd.read_csv("{}tbl_Benthic_Cover.csv".format(data_dir)))
         self._df_Rugosity = super()._df_preprocess(pd.read_csv("{}tbl_Rugosity.csv".format(data_dir)))
-        self._bleaching_columns = ['Event_ID', 'Location_ID', 'Start_Date', 'Rugosity', 'Entered_Date', 'Benthic_ID', 'Frame', 'Disease_Bleaching', 'Severity']
-        self._rugosity_columns = ['Event_ID', 'Location_ID', 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length"]
+        self._bleaching_columns = ['Event_ID', 'Location_ID', "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Start_Date', 'Rugosity', 'Entered_Date', 'Benthic_ID', 'Frame', 'Disease_Bleaching', 'Severity']
+        self._rugosity_columns = ['Event_ID', 'Location_ID', "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length"]
         self._location_columns = []
         # rugosity here refers to wehter the df contain such column, disease bleaching is yes or no
         super().__init__(data_dir)
@@ -67,6 +67,7 @@ class Data_loader_coral_reef_health(Data_loader):
         # get time & location vs bleaching
         df_time_loc_bleaching = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")
         df_time_loc_bleaching = df_time_loc_bleaching.merge(self._df_Locations, on='Location_ID', how='inner')[self._bleaching_columns]
+        df_time_loc_bleaching = df_time_loc_bleaching[df_time_loc_bleaching["Latitude"].notna()]
         return df_time_loc_bleaching
     
     def get_df_time_location_bleaching_severity(self):
@@ -74,12 +75,14 @@ class Data_loader_coral_reef_health(Data_loader):
         df = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")
         df = df.merge(self._df_Locations, on='Location_ID', how='inner')[self._bleaching_columns]
         df = df[df["Severity"].notna()]
+        df = df[df["Latitude"].notna()]
         return df
     
     def get_df_time_loc_rugosity(self):
         df_time_loc_rugosity = self._df_Events.merge(self._df_Rugosity, on='Event_ID', how="inner")
         df_time_loc_rugosity["Heterogeneity"] = df_time_loc_rugosity["Chain_length"] / df_time_loc_rugosity["Tape_length"]
         df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='inner')[self._rugosity_columns]
+        df_time_loc_rugosity = df_time_loc_rugosity[df_time_loc_rugosity["Latitude"].notna()]
         return df_time_loc_rugosity
 
 class Data_Loader_biomass_density_change(Data_loader):
@@ -97,12 +100,12 @@ class Data_Loader_biomass_density_change(Data_loader):
         self._df_Taxons = super()._df_preprocess(pd.read_csv("{}tlu_Taxon.csv".format(data_dir)))
         self._fish_density_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', 'Location_ID', 'Start_Date', 'Entered_Date', 'Number', 'Area']
         self._fish_density_taxon_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', "Taxon_Name", "Type", 'Location_ID', 'Start_Date', 'Entered_Date', 'Number', 'Area']
-        self._fish_density_taxon_loc_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', "Taxon_Name", "Type", 'Location_ID', 'Island', 'Subunit', 'Loc_Name', 'Start_Date', 'Entered_Date', 'Number', 'Area', 'Density']
+        self._fish_density_taxon_loc_columns = ['Fish_ID', 'Event_ID', 'Taxon_ID', "Taxon_Name", "Type", 'Location_ID', "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Island', 'Subunit', 'Loc_Name', 'Start_Date', 'Entered_Date', 'Number', 'Area', 'Density']
         self._juvenile_surface_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Taxon_ID", "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         self._juvenile_settlement_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         self._time_juvenile_size_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         self._time_juvenile_size_taxon_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
-        self._time_juvenile_size_taxon_loc_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", 'Island', 'Subunit', 'Loc_Name', "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
+        self._time_juvenile_size_taxon_loc_columns = ["Juv_Colony_ID", "Surface_ID", "Settlement_ID", "Event_ID", "Taxon_ID", "Location_ID", "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Island', 'Subunit', 'Loc_Name', "Taxon_Name", "Type", 'Start_Date', 'Entered_Date', "Genus_code", "Ind_Count", "Length_mm", "Width_mm"]
         # self._juvenile_density_columns = ['Event_ID', 'Location_ID', 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length"]
         
         super().__init__(data_dir)
@@ -128,6 +131,7 @@ class Data_Loader_biomass_density_change(Data_loader):
         df_time_fish_density_taxon["Density"] = df_time_fish_density_taxon["Number"] / df_time_fish_density_taxon["Area"]
         df_time_fish_density_taxon_loc = df_time_fish_density_taxon.merge(self._df_Locations, on='Location_ID', how="inner")[self._fish_density_taxon_loc_columns]
         df_time_fish_density_taxon_loc = df_time_fish_density_taxon_loc[df_time_fish_density_taxon_loc["Island"].notna()]
+        df_time_fish_density_taxon_loc = df_time_fish_density_taxon_loc[df_time_fish_density_taxon_loc["Latitude"].notna()]
         # Possible analysis TODO: Group density by months (either given Taxons or not) or 
         #                         Taxons (given months) using average, and plot the density change 
         #                         trend w.r.t. time/Taxon.
@@ -147,6 +151,7 @@ class Data_Loader_biomass_density_change(Data_loader):
         df_time_juvenile_size_taxon_loc = df_time_juvenile_size_taxon_loc[df_time_juvenile_size_taxon_loc["Island"].notna()]
         # clean out juveniles with unknown taxon name
         df_time_juvenile_size_taxon_loc = df_time_juvenile_size_taxon_loc[df_time_juvenile_size_taxon_loc["Taxon_Name"].notna()]
+        df_time_juvenile_size_taxon_loc = df_time_juvenile_size_taxon_loc[df_time_juvenile_size_taxon_loc["Latitude"].notna()]
         # compute sizes of juvenile individuals
         df_time_juvenile_size_taxon_loc["Size_mm"] = df_time_juvenile_size_taxon_loc["Length_mm"]*df_time_juvenile_size_taxon_loc["Width_mm"]
         # Possible analysis TODO: Group Size by Taxon using average, and measure the species size change 
@@ -158,10 +163,12 @@ class Data_Loader_biomass_density_change(Data_loader):
 if __name__ == "__main__":
     data_loader = Data_loader_coral_reef_health()
     data_loader_biomass = Data_Loader_biomass_density_change()
-    print(data_loader.get_df_time_loc_rugosity().columns.values, len(data_loader.get_df_time_loc_rugosity().columns.values))
-    print(data_loader.get_df_time_location_bleaching().columns.values, len(data_loader.get_df_time_location_bleaching().columns.values))
+    print(data_loader.get_df_time_loc_rugosity().columns.values, len(data_loader.get_df_time_loc_rugosity()))
+    print(data_loader.get_df_time_location_bleaching().columns.values, len(data_loader.get_df_time_location_bleaching()))
     print(data_loader_biomass.get_df_time_fish_density().columns.values, len(data_loader_biomass.get_df_time_fish_density()))
     print(data_loader_biomass.get_df_time_juvenile_size().columns.values, len(data_loader_biomass.get_df_time_juvenile_size()))
+    data_loader.get_df_time_loc_rugosity().to_csv("time_rugosity.csv")
+    data_loader.get_df_time_location_bleaching().to_csv("time_bleaching.csv")
     data_loader_biomass.get_df_time_fish_density().to_csv("time_fish_density.csv")
     data_loader_biomass.get_df_time_juvenile_size().to_csv("time_juvenile_size.csv")
     df_ju = data_loader_biomass.get_df_time_juvenile_size().groupby(["Island"])
