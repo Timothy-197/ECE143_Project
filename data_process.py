@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly.express as px
 
 class Data_loader:
     def __init__(self, data_dir = './records-2300415/'):
@@ -71,8 +72,9 @@ class Data_loader_coral_reef_health(Data_loader):
     
     def get_df_time_location_bleaching_severity(self):
         # get time & location vs bleaching with severity
-        df = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")[self._bleaching_columns]
-        df = df[df["Severity"].notna()]
+        df_time_loc_bleaching = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")[self._bleaching_columns]
+        df_time_loc_bleaching = df_time_loc_bleaching.merge(self._df_Locations, on='Location_ID', how='inner')
+        df = df_time_loc_bleaching[df_time_loc_bleaching["Severity"].notna()]
         return df
     
     def get_df_time_loc_rugosity(self):
@@ -145,6 +147,41 @@ class Data_Loader_biomass_density_change(Data_loader):
 if __name__ == "__main__":
     data_loader = Data_loader_coral_reef_health()
     data_loader_biomass = Data_Loader_biomass_density_change()
-    print(data_loader.get_df_time_loc_rugosity())
+    df_time_loc_rugosity = data_loader.get_df_time_loc_rugosity()
+    df_time_loc_bleaching = data_loader.get_df_time_location_bleaching_severity()
+    # df_time_loc_bleaching = df_time_loc_bleaching.drop(axis=0)
+    # df_time_loc_bleaching['Loc_Name'] = df_time_loc_bleaching['Loc_Name'].astype(int)
+    # loc_data = df_time_loc_bleaching['Loc_Name']
     print(data_loader_biomass.get_df_time_fish_density())
     print(data_loader_biomass.get_df_time_juvenile_size())
+    
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    # Assuming df_time_loc_rugosity is your DataFrame
+    # Convert Period to numerical representation using the 'ordinal' attribute
+    df_time_loc_bleaching['Start_Date_Num'] = df_time_loc_bleaching['Start_Date'].dt.to_timestamp().apply(lambda x: x.toordinal())
+    # df_het_10 = df_time_loc_bleaching[df_time_loc_bleaching['Location_ID'] == '{005A1863-5D44-4E62-B251-C5E650E31EAF}']
+    df_het_10 = df_time_loc_bleaching
+    df_het_10 = df_het_10[df_het_10['Disease_Bleaching'] == 'Yes']
+    class_mapping = {'No Coral':0, '0%' : 1, '1-25%': 2, '26-50%': 3, '51-75%': 4, '76-100%': 5}
+    df_het_10['sev_numeric'] = df_het_10['Severity'].map(class_mapping) 
+    df_het_10['sev_numeric_avg'] = df_het_10['sev_numeric'].rolling(window=3).mean()
+    # df_het_10['db_avg'] = df_het_10['Disease_Bleaching'].rolling(window=5).mean()
+    # Plot using the numerical representation of 'Entered_Date'
+    
+    # df_temp = df_het_10[['Entered_Date_Num', 'sev_numeric_avg']].groupby('Entered_Date_Num').median()
+    df_temp = df_het_10[['Start_Date_Num', 'Disease_Bleaching']].groupby('Start_Date_Num').count()
+    df_temp['db_avg'] = df_temp['Disease_Bleaching'].rolling(window=3).mean()
+    plt.scatter(df_temp.index, df_temp['db_avg'])
+
+    # You can customize the plot further if needed
+    plt.xlabel('Start Date')
+    plt.ylabel('Heterogeneity')
+    plt.title('Heterogeneity over Time')
+
+    plt.show()
+    
+    
+    
+    
