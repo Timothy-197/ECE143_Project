@@ -1,7 +1,9 @@
 import DataProcess.data_process as dp
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt   
+from matplotlib.patches import Patch
 import statistics as st
-import pandas as pd
+import pandas as pd  
+import numpy as np
 def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window=2):  
     ''' 
     function:def get_biomass_density_visualization(stats): 
@@ -22,7 +24,7 @@ def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window
 
     returns: gets the scatterplot and statistical operation (mean or median) visulaizations of the biomass density per island. 
     '''
-    assert stats=='Mean' or stats=='Median' or stats=='Window' #Did not enter either --> stats=='Mean' or stats=='Median' or stats=='Window'
+    assert stats=='Mean' or stats=='Median' or stats=='Window' or stats=='Scatter' #Did not enter either --> stats=='Mean' or stats=='Median' or stats=='Window' or stats=='Scatter'
     assert vis=='Density' or vis=='Size'    #Did not enter either --> vis=='Density' or vis=='Size'
     assert isinstance(taxon, bool)          #Did not enter --> a boolean value.
     assert isinstance(window,int) and window > 0
@@ -92,8 +94,9 @@ def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window
                 stats_vistype_time_axis, stats_density=zip(*[(key,st.median(stats_vistype_dict[key])) for key in stats_vistype_dict]) 
             elif stats=='Window': 
                 stats_vistype_time_axis, stats_density=zip(*[(key,st.mean(stats_vistype_dict[key])) for key in stats_vistype_dict]) 
-                stats_density=list(pd.DataFrame(stats_density,index=stats_vistype_time_axis).rolling(window).mean()[0])
-                
+                stats_density=list(pd.DataFrame(stats_density,index=stats_vistype_time_axis).rolling(window).mean()[0]) 
+            elif stats=='Scatter': 
+                stats_vistype_time_axis, stats_density=zip(*[(key,st.mean(stats_vistype_dict[key])) for key in stats_vistype_dict])
             else: 
                 raise NotImplementedError 
 
@@ -105,10 +108,18 @@ def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window
             ax1.set_xlabel('Years') 
             ax1.set_ylabel('Fish Density')
 
-            ax2.set_title(f'{stats} For Fish {vis} in {island} Since 2009')
-            ax2.plot(stats_vistype_time_axis,stats_density) 
+            ax2.set_title(f'{stats} For Fish {vis} in {island} Since 2009') 
+            if stats!='Scatter':
+                ax2.plot(stats_vistype_time_axis,stats_density)   
+            elif stats=='Scatter': 
+                ax2.scatter(stats_vistype_time_axis,stats_density) 
+                a, b = np.polyfit(np.array(stats_vistype_time_axis), np.array(stats_density), 1)
+                plt.plot(np.array(stats_vistype_time_axis), a*np.array(stats_vistype_time_axis)+b)
+            else: 
+                raise NotImplementedError
+
             ax2.set_xlabel('Years') 
-            ax2.set_ylabel('Fish Density')
+            ax2.set_ylabel('Fish Density') 
             plt.tight_layout()
             plt.show()
         
@@ -172,7 +183,9 @@ def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window
                     stats_vistype_time_axis, stats_density=zip(*[(key,st.median(stats_vistype_dict[key])) for key in stats_vistype_dict])  
                 elif stats=='Window': 
                     stats_vistype_time_axis, stats_density=zip(*[(key,st.mean(stats_vistype_dict[key])) for key in stats_vistype_dict]) 
-                    stats_density=list(pd.DataFrame(stats_density,index=stats_vistype_time_axis).rolling(window).mean()[0])
+                    stats_density=list(pd.DataFrame(stats_density,index=stats_vistype_time_axis).rolling(window).mean()[0]) 
+                elif stats=='Scatter': 
+                    stats_vistype_time_axis, stats_density=zip(*[(key,st.mean(stats_vistype_dict[key])) for key in stats_vistype_dict])
                 else: 
                     raise NotImplementedError  
                 
@@ -190,16 +203,211 @@ def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window
                     ax[0,index].set_xlabel('Years') 
                     ax[0,index].set_ylabel('Fish Density')
 
-                    ax[1,index].plot(data_per_taxon[key]['stats_vistype_time_axis'],data_per_taxon[key]['stats_density']) 
-                    ax[1,index].set_xlabel('Years') 
-                    ax[1,index].set_ylabel('Fish Density') 
+                    if stats != 'Scatter':
+                        ax[1,index].plot(data_per_taxon[key]['stats_vistype_time_axis'],data_per_taxon[key]['stats_density']) 
+                        ax[1,index].set_xlabel('Years') 
+                        ax[1,index].set_ylabel('Fish Density')  
+                    elif stats=='Scatter':  
+                        ax[1,index].scatter(data_per_taxon[key]['stats_vistype_time_axis'],data_per_taxon[key]['stats_density']) 
+                        a, b = np.polyfit(np.array(data_per_taxon[key]['stats_vistype_time_axis']), np.array(data_per_taxon[key]['stats_density']), 1)
+                        ax[1,index].plot(np.array(data_per_taxon[key]['stats_vistype_time_axis']), a*np.array(data_per_taxon[key]['stats_vistype_time_axis'])+b) 
+                        ax[1,index].set_xlabel('Years') 
+                        ax[1,index].set_ylabel('Fish Density')  
+                        
 
                 fig.suptitle(f'Scatter Plot and {stats} For {key} {vis} in {island} Since 2009', fontsize=16)
                 
                 plt.tight_layout()
                 plt.show()  
 
+def get_taxon_piechart(vis='Density'): 
+    ''' 
+        Function: get_taxon_piechart(vis='Density'):  
 
+        --> Gets the top 10 most common genus accross all islands at once, individually and alltogether. 
+
+        example:
+        --------
+        >>>get_taxon_piechart():
+        (matplot graphs)
+         
+        param str vis: vis=='Density' or vis=='Size' for type of visualization to obtain. Default to 'Density'  
+
+        returns: Gets the top 10 most common genus accross all islands at once, individually and alltogether. 
+    ''' 
+    for island in set(dp.Data_Loader_biomass_density_change().get_df_time_fish_density()['Island']): #['Tutuila', 'Hawaii', 'Molokai', 'Guam']
+        if vis=='Density':
+            #Biomass Density Dataframe overall
+            vis_data_frame=dp.Data_Loader_biomass_density_change().get_df_time_fish_density()   
+
+            #Biomass Density Dataframe, Densities at specific island
+            vis_data_frame_vistype=vis_data_frame[vis_data_frame['Island']==island]['Taxon_Name']  
+            
+
+        elif vis=='Size':  
+
+            #Size Stats only available for island of Molokai
+            if island != 'Molokai': 
+                continue
+
+            #Juvinile Colony Dataframe overall
+            vis_data_frame=dp.Data_Loader_biomass_density_change().get_df_time_juvenile_size()   
+
+            #Juvinile Colony Dataframe, Sizes at specific island
+            vis_data_frame_vistype=vis_data_frame[vis_data_frame['Island']==island]['Taxon_Name']   
+            
+        else: 
+            raise NotImplementedError 
+        fish_df_raw=pd.DataFrame({'fish':[name.split()[0] for name in vis_data_frame_vistype]}).value_counts() 
+        fish_df_raw=pd.DataFrame({'fish':fish_df_raw.index, 'counts':fish_df_raw.values}) 
+        fish_df=pd.DataFrame({'fish':fish_df_raw['fish'].apply(lambda x: x[0]),'counts':100*(fish_df_raw['counts']/fish_df_raw['counts'].sum())}).head(5) 
+        
+        fish_df_2=pd.DataFrame({'fish':['Other'],'counts':[100-fish_df['counts'].sum()]})  
+        print(fish_df_2)
+        fish_df=pd.concat([fish_df,fish_df_2]) 
+        
+        fig, ax = plt.subplots() 
+        explode=[0 for i in range(len(fish_df))] 
+        explode[0]=0.3 
+
+        ax.pie(fish_df['counts'], labels=fish_df['fish'], autopct='%1.1f%%',explode=explode) 
+        ax.set_title(f'Frequency of Genus on {island}')
+        
+        plt.tight_layout()
+        plt.show()
+
+    fish_df_raw=pd.DataFrame({'fish':[name.split()[0] for name in vis_data_frame['Taxon_Name']]}).value_counts() 
+    fish_df_raw=pd.DataFrame({'fish':fish_df_raw.index, 'counts':fish_df_raw.values}) 
+    fish_df=pd.DataFrame({'fish':fish_df_raw['fish'].apply(lambda x: x[0]),'counts':100*(fish_df_raw['counts']/fish_df_raw['counts'].sum())}).head(5) 
+    
+    fish_df_2=pd.DataFrame({'fish':['Other'],'counts':[100-fish_df['counts'].sum()]})  
+    print(fish_df_2)
+    fish_df=pd.concat([fish_df,fish_df_2]) 
+    
+    fig, ax = plt.subplots() 
+    explode=[0 for i in range(len(fish_df))] 
+    explode[0]=0.3 
+
+    ax.pie(fish_df['counts'], labels=fish_df['fish'], autopct='%1.1f%%',explode=explode) 
+    ax.set_title(f'Frequency of Genus Overall')
+    
+    plt.tight_layout()
+    plt.show()    
+
+def get_taxon_over_time(vis='Density'): 
+    ''' 
+        Function: get_taxon_over_time(vis='Density'):  
+
+        --> gets the top 10 most common genus per year per island in percents. 
+
+        example:
+        --------
+        >>>get_taxon_over_time(vis='Density') 
+        (matplot graphs)
+         
+        param str vis: Vis=='Density' or Vis=='Size' for type of visualization to obtain. Default to 'Density'  
+
+        returns: gets the top 10 most common genus per year per island in percents. 
+    '''
+
+    for island in set(dp.Data_Loader_biomass_density_change().get_df_time_fish_density()['Island']): #['Tutuila', 'Hawaii', 'Molokai', 'Guam']
+        
+        if vis=='Density':
+            #Biomass Density Dataframe overall
+            vis_data_frame=dp.Data_Loader_biomass_density_change().get_df_time_fish_density()   
+
+            #Biomass Density Dataframe; Dates at specific island
+            vis_data_frame_dates=vis_data_frame[(vis_data_frame['Island']==island)]['Start_Date']  
+            
+            #Biomass Density Dataframe, Densities at specific island
+            vis_data_frame_vistype=vis_data_frame[(vis_data_frame['Island']==island)]['Taxon_Name']            
+            
+             
+        elif vis=='Size':  
+
+            #Size Stats only available for island of Molokai
+            if island != 'Molokai': 
+                continue
+
+            #Juvinile Colony Dataframe overall
+            vis_data_frame=dp.Data_Loader_biomass_density_change().get_df_time_juvenile_size()   
+            
+            #Juvinile Colony Dataframe; Dates at specific island
+            vis_data_frame_dates=vis_data_frame[(vis_data_frame['Island']==island)]['Start_Date']  
+            #Juvinile Colony Dataframe, Sizes at specific island
+            vis_data_frame_vistype=vis_data_frame[(vis_data_frame['Island']==island)]['Taxon_Name']   
+            
+        
+        else: 
+            raise NotImplementedError  
+        
+        
+
+        time_axis=[int(str(date).split('-')[0]) for date in vis_data_frame_dates]  
+        
+        #creates a dict where the keys are the year, and the values are arrays that contain the genus that was recorded that year.
+        taxon_breakdown_per_date_names={}
+        for date_fish in zip(time_axis,list(vis_data_frame_vistype)): 
+            try: 
+                taxon_breakdown_per_date_names[date_fish[0]].append(date_fish[1].split()[0]) 
+            except KeyError: 
+                taxon_breakdown_per_date_names[date_fish[0]]=[date_fish[1].split()[0]]  
+
+        #creates a dict where the keys are the year and the values are dicts, where the keys are the genus, and the values are percentage of times it appears.
+        taxon_breakdown_per_date_numbers={}
+        for key in taxon_breakdown_per_date_names: 
+            breakdown_per_taxon={} 
+            for taxon_name in vis_data_frame_vistype.unique():  
+                if taxon_name.split()[0] in taxon_breakdown_per_date_names[key]:
+                    breakdown_per_taxon[taxon_name.split()[0]]=(((pd.Series(taxon_breakdown_per_date_names[key])==taxon_name.split()[0]).sum()/len(taxon_breakdown_per_date_names[key]))*100) 
+                else: 
+                    breakdown_per_taxon[taxon_name.split()[0]]=0
+            taxon_breakdown_per_date_numbers[key]=breakdown_per_taxon    
+        
+          
+        #undicts the taxon_breakdown_per_date_numbers and separate sthem into lists of date, genus, and percents.
+        taxon_breakdown_per_date_list=sorted([(key, 
+                                        list(taxon_breakdown_per_date_numbers[key].keys()),  
+                                        list(taxon_breakdown_per_date_numbers[key].values())) for key in taxon_breakdown_per_date_numbers])
+            
+        fig, ax = plt.subplots(figsize=(10,10))
+        ax.set_title('Animated Fish Quantities per Date')
+        ax.set_ylabel('Fish Types')
+        ax.set_xlabel('Quantity')
+        
+        #for loop that generates the animation for top 10 most common genus per year.
+        for i in range(len(taxon_breakdown_per_date_list)):
+            #print(f'{taxon_breakdown_per_date_list[i][0]} : {max(zip(taxon_breakdown_per_date_list[i][2],taxon_breakdown_per_date_list[i][1]))} ')
+            #'''
+            ax.set_title(f'10 Most Common Genus on {island} \n {(int(taxon_breakdown_per_date_list[i][0]))}')
+            ax.set_ylabel('Fish Genus')
+           
+            
+
+            # Plot the animated histogram 
+            fish_df=pd.DataFrame({'fish':taxon_breakdown_per_date_list[i][1],'quantity':taxon_breakdown_per_date_list[i][2]}).sort_values(by='quantity')
+            
+            fish_mode=str(pd.Series([name.split()[0] for name in vis_data_frame['Taxon_Name']]).mode()[0])  
+            non_highlight_color='#768493' 
+            highlight_color='#1f77b4'
+
+            fish_df['colors']=fish_df['fish'].apply(lambda x: highlight_color if str(x) == fish_mode else non_highlight_color)  
+            bars=plt.barh(fish_df.tail(10)['fish'],fish_df.tail(10)['quantity'],height=0.8,color=fish_df.tail(10)['colors'])  
+            
+            ax.spines[['right','bottom','top']].set_visible(False) 
+            ax.xaxis.set_visible(False) 
+            ax.bar_label(bars, padding=-45, color='white',fontsize=10,label_type='edge',fmt='%.1f%%',fontweight='bold')
+            #plt.tight_layout
+            plt.xlim(0, 30) 
+            plt.legend(handles=[Patch(facecolor="#1f77b4", label="Most Frequently Appearing Genus Since 2009")],loc='lower right')
+            plt.yticks(fontsize=10)  # Set a smaller font size for y-axis labels
+            plt.subplots_adjust(left=0.2)  # Adjust the left margin
+            plt.draw() 
+            plt.pause(0.3) 
+            ax.cla()
+            #'''
+        plt.close()
+        
 '''
 print(dp.Data_Loader_biomass_density_change().get_df_time_fish_density().columns)
 print(dp.Data_Loader_biomass_density_change().get_df_time_juvenile_size().columns) 
@@ -225,8 +433,9 @@ plt.scatter(sorted_time_axis, sorted_rugosity_axis)
 plt.show()
 '''
 if __name__ == "__main__": 
-    #get_fish_data_visualization(stats='Window', vis='Density', taxon=True, window=2)
-    get_fish_data_visualization(stats='Mean', vis='Density', taxon=True, window=2)
+    #get_fish_data_visualization(stats='Scatter', vis='Density', taxon=False, window=4) 
+    #get_taxon_over_time(vis='Density') 
+    get_taxon_piechart(vis='Density')
    
     
 
