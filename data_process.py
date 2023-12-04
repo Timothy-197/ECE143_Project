@@ -57,12 +57,13 @@ class Data_loader_coral_reef_health(Data_loader):
     def __init__(self, data_dir='./records-2300415/'):
         self._df_benthic_cover = super()._df_preprocess(pd.read_csv("{}tbl_Benthic_Cover.csv".format(data_dir)))
         self._df_Rugosity = super()._df_preprocess(pd.read_csv("{}tbl_Rugosity.csv".format(data_dir)))
-        self._bleaching_columns = ['Event_ID', 'Location_ID', "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Start_Date', 'Rugosity', 'Entered_Date', 'Benthic_ID', 'Frame', 'Disease_Bleaching', 'Severity']
-        self._rugosity_columns = ['Event_ID', 'Location_ID', "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length"]
+        self._bleaching_columns = ['Event_ID', 'Location_ID', "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Start_Date', 'Rugosity', 'Entered_Date', 'Benthic_ID', 'Frame', 'Disease_Bleaching', 'Severity', 'Island']
+        self._rugosity_columns = ['Event_ID', 'Location_ID', "Latitude", "Latitude_Dir", "Longitude", "Longitude_Dir", 'Start_Date', 'Rugosity', 'Entered_Date', "Chain_length", "Tape_length", 'Island']
         self._location_columns = []
         # rugosity here refers to wehter the df contain such column, disease bleaching is yes or no
         super().__init__(data_dir)
-    
+
+
     def get_df_time_location_bleaching(self):
         # get time & location vs bleaching
         df_time_loc_bleaching = self._df_Events.merge(self._df_benthic_cover, on='Event_ID', how="inner")
@@ -77,11 +78,13 @@ class Data_loader_coral_reef_health(Data_loader):
         df = df[df["Severity"].notna()]
         df = df[df["Latitude"].notna()]
         return df
+
+   
     
     def get_df_time_loc_rugosity(self):
         df_time_loc_rugosity = self._df_Events.merge(self._df_Rugosity, on='Event_ID', how="inner")
         df_time_loc_rugosity["Heterogeneity"] = df_time_loc_rugosity["Chain_length"] / df_time_loc_rugosity["Tape_length"]
-        df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='inner')[self._rugosity_columns]
+        df_time_loc_rugosity = df_time_loc_rugosity.merge(self._df_Locations, on='Location_ID', how='left')
         df_time_loc_rugosity = df_time_loc_rugosity[df_time_loc_rugosity["Latitude"].notna()]
         return df_time_loc_rugosity
 
