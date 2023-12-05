@@ -101,7 +101,7 @@ def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window
                 raise NotImplementedError 
 
             #plot
-            fig, (ax1, ax2) =plt.subplots( nrows=2, ncols=1, figsize=(6,4))
+            fig, (ax1, ax2) =plt.subplots( nrows=2, ncols=1, figsize=(10,8))
             
             ax1.set_title(f'Scatter Plot For Fish {vis} in {island} Since 2009')
             ax1.scatter(sorted_time_axis, sorted_vistype_axis)  
@@ -120,6 +120,8 @@ def get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window
 
             ax2.set_xlabel('Years') 
             ax2.set_ylabel('Fish Density') 
+
+            #plt.savefig(f'datavis/{stats}_{island}_{vis}.jpg')
             plt.tight_layout()
             plt.show()
         
@@ -273,6 +275,7 @@ def get_taxon_piechart(vis='Density'):
         ax.pie(fish_df['counts'], labels=fish_df['fish'], autopct='%1.1f%%',explode=explode) 
         ax.set_title(f'Frequency of Genus on {island}')
         
+        #plt.savefig(f'piecharts/{island}.jpg')
         plt.tight_layout()
         plt.show()
 
@@ -291,6 +294,7 @@ def get_taxon_piechart(vis='Density'):
     ax.pie(fish_df['counts'], labels=fish_df['fish'], autopct='%1.1f%%',explode=explode) 
     ax.set_title(f'Frequency of Genus Overall')
     
+    #plt.savefig(f'piecharts/all_islands.jpg')
     plt.tight_layout()
     plt.show()    
 
@@ -402,7 +406,8 @@ def get_taxon_over_time(vis='Density'):
             plt.legend(handles=[Patch(facecolor="#1f77b4", label="Most Frequently Appearing Genus Since 2009")],loc='lower right')
             plt.yticks(fontsize=10)  # Set a smaller font size for y-axis labels
             plt.subplots_adjust(left=0.2)  # Adjust the left margin
-            plt.draw() 
+            plt.draw()  
+            #plt.savefig(f'taxon_time/Taxon_{island}_frame_{i}.jpg') USE THIS TO SAVE EACH FIGURE
             plt.pause(0.3) 
             ax.cla()
             #'''
@@ -433,8 +438,15 @@ plt.scatter(sorted_time_axis, sorted_rugosity_axis)
 plt.show()
 '''
 if __name__ == "__main__": 
-    #get_fish_data_visualization(stats='Scatter', vis='Density', taxon=False, window=4) 
-    #get_taxon_over_time(vis='Density') 
+    get_fish_data_visualization(stats='Mean', vis='Density', taxon=False, window=4) 
+    get_fish_data_visualization(stats='Window', vis='Density', taxon=False, window=4) 
+    get_fish_data_visualization(stats='Scatter', vis='Density', taxon=False, window=4) 
+    get_fish_data_visualization(stats='Median', vis='Density', taxon=False, window=4)  
+    get_fish_data_visualization(stats='Mean', vis='Size', taxon=False, window=4) 
+    get_fish_data_visualization(stats='Window', vis='Size', taxon=False, window=4) 
+    get_fish_data_visualization(stats='Scatter', vis='Size', taxon=False, window=4) 
+    get_fish_data_visualization(stats='Median', vis='Size', taxon=False, window=4)  
+    get_taxon_over_time(vis='Density') 
     get_taxon_piechart(vis='Density')
    
     
